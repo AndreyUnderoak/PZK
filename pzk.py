@@ -4,7 +4,7 @@ import numpy as np
 def to_rad(angle):
     return angle * np.pi /180
 
-thao_angles = np.array([169, 65, -146, 102, 167])
+thao_angles = np.array([169, 65, 146, 102, 167])
 thao_angles = to_rad(thao_angles)
 
 l = [0.033, 0.147, 0.155, 0.135, 0.2175]
