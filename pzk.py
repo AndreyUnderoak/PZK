@@ -28,7 +28,7 @@ def z_f(angles):
     return (l[1] + l[2] * np.cos(angles[2 -1]) + l[3] * np.cos(angles[2 -1] + angles[3-1]) + l[4] * np.cos(angles[2 -1] + angles[3-1] + angles[4 -1]))
  
 
-time = np.arange(0, 20, 0.2)
+time = np.arange(0, 200, 0.2)
 
 r_array = [r(time, 1.8, np.pi/4, 1 -1),
 r(time, 1.8, np.pi/4, 2 -1),
