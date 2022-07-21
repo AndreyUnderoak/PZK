@@ -4,7 +4,7 @@ import numpy as np
 def to_rad(angle):
     return angle * np.pi /180
 
-thao_angles = np.array([169, 65, 146, 102, 167])
+thao_angles = np.array([169, 65, -146, 102, 167])
 thao_angles = to_rad(thao_angles)
 
 l = [0.033, 0.147, 0.155, 0.135, 0.2175]
@@ -19,13 +19,13 @@ def thao(r_array):
     return r_array
 
 def x_f(angles):
-    return np.cos(angles[1 -1]) * (l[0] + l[2] * np.sin(angles[2 -1]) + l[3] * np.sin(angles[2 -1] + angles[3-1]) + l[4] * np.sin(angles[2 -1] + angles[3-1] + angles[4 -1]))
+    return np.cos(angles[1 -1]) * (l[0] + l[2] * np.sin(angles[2 -1]) + l[3] * np.sin(angles[2 -1] - angles[3-1]) + l[4] * np.sin(angles[2 -1] - angles[3-1] + angles[4 -1]))
 
 def y_f(angles):
-    return - np.sin(angles[1 -1]) * (l[0] + l[2] * np.sin(angles[2 -1]) + l[3] * np.sin(angles[2 -1] + angles[3-1]) + l[4] * np.sin(angles[2 -1] + angles[3-1] + angles[4 -1]))
+    return - np.sin(angles[1 -1]) * (l[0] + l[2] * np.sin(angles[2 -1]) + l[3] * np.sin(angles[2 -1] - angles[3-1]) + l[4] * np.sin(angles[2 -1] - angles[3-1] + angles[4 -1]))
 
 def z_f(angles):
-    return (l[1] + l[2] * np.cos(angles[2 -1]) + l[3] * np.cos(angles[2 -1] + angles[3-1]) + l[4] * np.cos(angles[2 -1] + angles[3-1] + angles[4 -1]))
+    return (l[1] + l[2] * np.cos(angles[2 -1]) + l[3] * np.cos(angles[2 -1] - angles[3-1]) + l[4] * np.cos(angles[2 -1] - angles[3-1] + angles[4 -1]))
  
 
 time = np.arange(0, 200, 0.2)
