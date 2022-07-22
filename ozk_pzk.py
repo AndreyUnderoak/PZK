@@ -49,16 +49,18 @@ def thao_1(x, y, z, l):
 #OZK for T1
 def thao_2_helper(x, y, z, l):
     xp = x * np.cos(thao_1(x, y, z, l)) + y * np.sin(thao_1(x, y, z, l))
-    x_l0 = []
-    for i in np.c_[xp]:
-        if i > 0:
-            x_l0.append((i - l[0])[0])
-        else:
-            x_l0.append((i + l[0])[0])
-    x_l0 = np.array(x_l0)
-    p  = np.sqrt(np.square(x_l0) + np.square(z))
-    b = (np.square(l[2]) + np.square(p) - np.square(l[3])) / (2 * l[2] * p)
-    return np.arctan2(x_l0, z) - np.arctan2(np.sqrt(1-np.square(b)), b)
+    # yp = x * -np.sin(thao_1(x, y, z, l)) + y * np.cos(thao_1(x, y, z, l))
+    # print('yp', yp)
+
+    # p  = np.sqrt(np.square(xp - l[0]) + np.square(z))
+    p  = np.sqrt((xp - l[0])**2 + z**2)
+
+    # cosine of the angles. should be less than one (b <= 1)
+    b = (l[2]**2 + p**2 - l[3]**2) / (2 * l[2] * p)
+    for i in np.c_[b]:
+        if np.abs(i) > 1 :
+            raise Exception("OUT OF LINKS RANGE")
+    return np.arctan2(xp - l[0], z) - np.arctan2(np.sqrt(1-np.square(b)), b)
 
 def thao_2(x, y, z, l):
     arra = []
@@ -73,33 +75,13 @@ def thao_2(x, y, z, l):
 def thao_3_helper(x, y, z, l):
     th_1 = thao_1(x, y, z, l)
     xp = x * np.cos(th_1) + y * np.sin(th_1)
-    x_l0 = []
-    for i, k in np.c_[xp, th_1]:
-        if i > 0:
-            if k < 0:
-                x_l0.append((l[0] + i))
-            else:
-                if i < l[0]:
-                    x_l0.append((l[0] - i))
-                else:
-                    x_l0.append((i - l[0]))
-        else:
-            if k > 0:
-                x_l0.append((l[0] + i))
-            else:
-                if i > l[0]:
-                    x_l0.append((-l[0] + i))
-                else:
-                    x_l0.append((i + l[0]))
-
-    x_l0 = np.array(x_l0)
-
-    p  = np.sqrt(np.square(x_l0) + np.square(z))
+    p  = np.sqrt(np.square(xp - l[0]) + np.square(z))
 
     a  = (np.square(l[2]) + np.square(l[3]) - np.square(p)) / (2 * l[2] * l[3])
     for i in np.c_[a]:
-        if (i > 1):
-            print(i)
+        if np.abs(i) > 1 :
+            raise Exception("OUT OF LINKS RANGE")
+
     return np.pi - np.arctan2(np.sqrt(1-np.square(a)), a)
 
 def thao_3(x, y, z, l):
@@ -148,64 +130,49 @@ x = x_f(thao_array)
 y = y_f(thao_array)
 z = z_f(thao_array)
 
-print(x[0])
-print(y[0])
-print(z[0])
 
 #########START OZK############
+try :
+    thaos = [
+        np.array(thao_1(x,y,z,l)),
+        np.array(thao_2(x,y,z,l)),
+        np.array(thao_3(x,y,z,l))
+    ]
+    plt.plot(time, thao_array[0])
+    plt.plot(time, thaos[0])
+    plt.show()
+    x2 = x_f(thaos)
+    y2 = y_f(thaos)
+    z2 = z_f(thaos)
+    graph3d(x, y, z)
+    graph3d(x2, y2, z2)
+    plt.show()
 
-thaos = [
-    np.array(thao_1(x,y,z,l)),
-    np.array(thao_2(x,y,z,l)),
-    np.array(thao_3(x,y,z,l))
-]
+except:
+    print("OUT OF LINKS RANGE")
 
+x_coor = np.array([0.2])
+y_coor = np.array([0.2])
+z_coor = np.array([0.2])
 
-#2dGraph thao_array[n] with thaos[n]
+try :
+    thaos_coor = [
+        np.array(thao_1(x_coor,y_coor,z_coor,l)),
+        np.array(thao_2(x_coor,y_coor,z_coor,l)),
+        np.array(thao_3(x_coor,y_coor,z_coor,l))
+    ]
+    x_coor = x_f(thaos_coor)
+    y_coor = y_f(thaos_coor)
+    z_coor = z_f(thaos_coor)
+    print(x_coor)
+    print(y_coor)
+    print(z_coor)
 
-plt.plot(time, thao_array[0])
-#plt.plot(time, r_array[0])
-plt.plot(time, thaos[0])
-#plt.show()
-#plt.plot(time, x)
-#plt.plot(x, y)
-
-x2 = x_f(thaos)
-y2 = y_f(thaos)
-z2 = z_f(thaos)
-
-x_coor = np.array([-0.1])
-y_coor = np.array([-0.1])
-z_coor = np.array([-0.05])
-
-thaos_coor = [
-    np.array(thao_1(x_coor,y_coor,z_coor,l)),
-    np.array(thao_2(x_coor,y_coor,z_coor,l)),
-    np.array(thao_3(x_coor,y_coor,z_coor,l))
-]
-
-print(thaos_coor)
-
-x_coor = x_f(thaos_coor)
-y_coor = y_f(thaos_coor)
-z_coor = z_f(thaos_coor)
-
-print(x_coor)
-print(y_coor)
-print(z_coor)
-
-#graph3d(x, y, z)
-#graph3d(x2, y2, z2)
-#plt.plot(time,z)
-#plt.plot(time,z2)
-
-plt.show()
-
+except:
+    print("OUT OF LINKS RANGE")
 
 
 ##########END OZK#############
 
-#GRAPH
-#graph3d(x, y, z)
 
 
