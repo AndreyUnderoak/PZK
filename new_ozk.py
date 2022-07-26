@@ -51,17 +51,14 @@ def t_1(x, y, conf_t_1):
     if conf_t_1 == 1 :
         return np.arctan2(y,x)
     if conf_t_1 == 2 :
-        return np.arctan2(-y,-x) 
+        return np.arctan2(y,x) - np.pi 
 
 #OZK for T3
 def t_3(x, y, z, l, conf_t_1, conf_t_3):
     t_1_temp = t_1(x, y, conf_t_1)
     xp = x * np.cos(t_1_temp) + y * np.sin(t_1_temp)
 
-    if conf_t_1 == 1 :
-        p_square = (xp - l[0])**2 + z**2
-    if conf_t_1 == 2 :
-        p_square = (xp + l[0])**2 + z**2
+    p_square = (xp - l[0])**2 + z**2
     
     cosT_3  = - (l[2]**2 + l[3]**2 - p_square) / (2 * l[2] * l[3])
 
@@ -81,11 +78,8 @@ def t_2(x, y, z, l, conf_t_1, conf_t_3):
 
     t_3_temp = t_3(x, y, z, l, conf_t_1, conf_t_3)
     beta = np.arctan2(l[3]*np.sin(t_3_temp), l[2]+l[3]*np.cos(t_3_temp))
-    
-    if conf_t_1 == 1 :
-        return np.arctan2(xp - l[0], z) - beta
-    if conf_t_1 == 2 :
-        return np.arctan2(xp + l[0], z) - beta
+
+    return np.arctan2(xp - l[0], z) - beta
 
 
 #GRAPHs
@@ -117,7 +111,7 @@ r(time, 1.8, np.pi/4, 3 -1)]
 
 
 #converting to KINEMATIC model
-thao_array = thao(r_array, thao_angles)
+thao_array = r_to_t(r_array, thao_angles)
 
 #PZK coordinates
 x = x_f(thao_array)
@@ -126,38 +120,50 @@ z = z_f(thao_array)
 
 
 #########START OZK############
-try :
-    thaos = [
-        np.array(thao_1(x,y,z,l)),
-        np.array(thao_2(x,y,z,l)),
-        np.array(thao_3(x,y,z,l))
-    ]
-    plt.plot(time, thao_array[0])
-    plt.plot(time, thaos[0])
-    plt.show()
-    x2 = x_f(thaos)
-    y2 = y_f(thaos)
-    z2 = z_f(thaos)
-    graph3d(x, y, z)
-    graph3d(x2, y2, z2)
-    plt.show()
+# try :
+#     thaos = [
+#         np.array(thao_1(x,y,z,l)),
+#         np.array(thao_2(x,y,z,l)),
+#         np.array(thao_3(x,y,z,l))
+#     ]
+#     plt.plot(time, thao_array[0])
+#     plt.plot(time, thaos[0])
+#     plt.show()
+#     x2 = x_f(thaos)
+#     y2 = y_f(thaos)
+#     z2 = z_f(thaos)
+#     graph3d(x, y, z)
+#     graph3d(x2, y2, z2)
+#     plt.show()
 
-except:
-    print("OUT OF LINKS RANGE")
+# except:
+#     print("OUT OF LINKS RANGE")
+
+
+################TEST################
+t_1_conf = 1
+t_3_conf = 1
 
 x_coor = np.array([0.2])
 y_coor = np.array([0.2])
 z_coor = np.array([0.2])
 
 try :
-    thaos_coor = [
-        np.array(thao_1(x_coor,y_coor,z_coor,l)),
-        np.array(thao_2(x_coor,y_coor,z_coor,l)),
-        np.array(thao_3(x_coor,y_coor,z_coor,l))
+    t_array = [
+        np.array(t_1(x_coor,y_coor, t_1_conf)),
+        np.array(t_2(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf)),
+        np.array(t_3(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf))
     ]
-    x_coor = x_f(thaos_coor)
-    y_coor = y_f(thaos_coor)
-    z_coor = z_f(thaos_coor)
+    x_coor = x_f(t_array)
+    y_coor = y_f(t_array)
+    z_coor = z_f(t_array)
+
+    print(t_array[0])
+    print(t_array[1])
+    print(t_array[2])
+
+    print("------------")
+
     print(x_coor)
     print(y_coor)
     print(z_coor)
@@ -166,7 +172,6 @@ except:
     print("OUT OF LINKS RANGE")
 
 
+
+
 ##########END OZK#############
-
-
-
