@@ -141,35 +141,43 @@ z = z_f(thao_array)
 
 
 ################TEST################
-t_1_conf = 1
+t_1_conf = 2
 t_3_conf = 1
 
-x_coor = np.array([0.2])
-y_coor = np.array([0.2])
-z_coor = np.array([0.2])
+for i in range(1, 3):
+    for j in range(1, 3):
+        t_1_conf = i
+        t_3_conf = j
+        print('conf ({}, {})'.format(i, j))
 
-try :
-    t_array = [
-        np.array(t_1(x_coor,y_coor, t_1_conf)),
-        np.array(t_2(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf)),
-        np.array(t_3(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf))
-    ]
-    x_coor = x_f(t_array)
-    y_coor = y_f(t_array)
-    z_coor = z_f(t_array)
+        x_coor = np.array([0.2])
+        y_coor = np.array([0.2])
+        z_coor = np.array([0.2])
 
-    print(t_array[0])
-    print(t_array[1])
-    print(t_array[2])
+        try :
+            t_array = [
+                np.array(t_1(x_coor,y_coor, t_1_conf)),
+                np.array(t_2(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf)),
+                np.array(t_3(x_coor,y_coor,z_coor,l, t_1_conf, t_3_conf))
+            ]
+            x_coor = x_f(t_array)
+            y_coor = y_f(t_array)
+            z_coor = z_f(t_array)
 
-    print("------------")
+            print(t_array[0])
+            print(t_array[1])
+            print(t_array[2])
 
-    print(x_coor)
-    print(y_coor)
-    print(z_coor)
+            print("------------")
 
-except:
-    print("OUT OF LINKS RANGE")
+            print(x_coor)
+            print(y_coor)
+            print(z_coor)
+
+            print('------------------')
+
+        except:
+            print("OUT OF LINKS RANGE")
 
 
 
