@@ -1,5 +1,4 @@
 import roboticstoolbox as rtb
-import spatialmath.base as spmb
 import spatialmath as spm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,9 +13,11 @@ youbot = rtb.DHRobot(
     rtb.RevoluteDH(d=0, a=l[3], alpha=np.pi, offset = 0),
     rtb.RevoluteDH(d=0, a=0, alpha=np.pi/2, offset = -np.pi/2),
     rtb.RevoluteDH(d=-l[4], a=0, alpha=0, offset = 0)
-], base = spm.SE3.Rx(np.pi), name="Puma560")
+], base = spm.SE3.Rx(np.pi), name="YOUBOT")
 
 print(youbot)
-youbot.teach()
+
+youbot.plot(youbot.q, block=True)
+
 
 plt.show()
