@@ -3,6 +3,9 @@ import numpy as np
 import roboticstoolbox as rtb
 import spatialmath as spm
 
+np.set_printoptions(precision=4, suppress=True)
+
+
 class Youbot :
     #length of the YOUBOT's links 
     links_length = [0.033, 0.147, 0.155, 0.135, 0.2175]
@@ -108,11 +111,16 @@ class Youbot :
         for i in np.c_[cosT_3]:
             if np.abs(i) > 1 :
                 raise Exception("OUT OF LINKS RANGE")
-
-        if conf_t_3 == 1 :
-            return np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
-        if conf_t_3 == 2 :
-            return - np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
+        if conf_t_1 == 1:
+            if conf_t_3 == 1 :
+                return np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
+            if conf_t_3 == 2 :
+                return - np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
+        else:
+            if conf_t_3 == 2 :
+                return np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
+            if conf_t_3 == 1 :
+                return - np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
 
     #OZK for T2
     def t_2(self, x, y, z, l, conf_t_1, conf_t_3):
@@ -123,16 +131,38 @@ class Youbot :
         beta = np.arctan2(l[3]*np.sin(t_3_temp), l[2]+l[3]*np.cos(t_3_temp))
 
         return np.arctan2(xp - l[0], z - l[1]) - beta
+    
+    def orientation(self, orientation_angle, theta_1, conf_t_1):
+        th1 = -theta_1
+        if conf_t_1 == 2:
+            th1 += np.pi
 
-    def inverse_position(self, coordinates, conf_t_1, conf_t_3):
+        m1 = np.zeros([3,3]); m2 = m1.copy()
 
-        return np.array([
-                    - self.t_1(coordinates[0], coordinates[1], conf_t_1),
+        m1[1][1] = np.cos(th1) 
+        m1[0][0] = np.cos(th1)
+        m1[0][1] = - np.sin(th1)
+        m1[1][0] = np.sin(th1)
+        m1[2][2] = 1
+
+        m2[2][2] = np.cos(orientation_angle - np.pi/2)
+        m2[0][0] = np.cos(orientation_angle - np.pi/2)
+        m2[0][2] = np.sin(orientation_angle - np.pi/2)
+        m2[2][0] = - np.sin(orientation_angle - np.pi/2)
+        m2[1][1] = 1
+        
+        return np.dot(m1,m2)
+
+    def inverse_position(self, coordinates, theta_array, conf_t_1, conf_t_3):
+
+        theta_array = np.append(theta_array, np.array
+                ([
                     self.t_2(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3),
                     - self.t_3(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3)
-                ])
+                ]))
+        return theta_array
 
-    def inverse_orientation(self, theta_array):
+    def inverse_orientation(self, theta_array, r05):
         r03 = self.get_rot_matrix(theta_array, 0, 3)
         tr03 = np.transpose(r03)
 
@@ -145,17 +175,23 @@ class Youbot :
 
         return theta_array
 
-    def inverse_get_theta_array(self, coordinates, r05, conf_t_1, conf_t_3):
+    def inverse_get_theta_array(self, coordinates, conf_t_1, conf_t_3, orientation_angle = 0):
+
+        theta_array = np.array([- self.t_1(coordinates[0], coordinates[1], conf_t_1)])
+
+        print("th1 = ", theta_array[0])
+
+        r05 = self.orientation(orientation_angle, theta_array[0], conf_t_1)
+
+        print(r05)
         #shift to p coordinates
         p = coordinates - np.dot(r05, np.array([0, 0, -self.links_length[4]]))
 
-        print("p=", p)
+        print("p = ", p)
 
-        theta_array = self.inverse_position(p, conf_t_1, conf_t_3)
-
-        print(theta_array)
+        theta_array = self.inverse_position(p, theta_array, conf_t_1, conf_t_3)
         
-        theta_array = self.inverse_orientation(theta_array)
+        theta_array = self.inverse_orientation(theta_array, r05)
 
         return theta_array
     ################IKP END##################
@@ -172,50 +208,20 @@ class Youbot :
 
 youbot = Youbot()
 
-theta_array = np.array([
-    0,
-    0,  
-    -np.pi/2,
-    0,
-    0
-])
-
-
-#ORIENTATION
-angle_const = np.pi/2
-
-r05 = youbot.get_rot_matrix(theta_array, 0, 5)
-
-print(r05)
-
-#youbot.view_model.plot(theta_array, block=True)
-youbot.view_model.teach()
-plt.show()
-# r05[1][1] = 1
-# r05[0][0] = r05[2][2] = np.cos(angle_const)
-# r05[2][0] = - np.sin(angle_const)
-# r05[0][2] = np.sin(angle_const)
-
 #GOAL coordinates
-x = 0.3
-y = 0
-z = 0.2
+x = 0.15
+y = 0.15
+z = 0.4
 coordinates = np.array([x,y,z])
 
-print(coordinates)
+print("coor = " ,coordinates)
 
-theta_array = youbot.inverse_get_theta_array(coordinates, r05, conf_t_1 = 2, conf_t_3 = 1)
+theta_array = youbot.inverse_get_theta_array(coordinates, conf_t_1 = 1, conf_t_3 = 1, orientation_angle = -np.pi/4)
 
-
-
-print(theta_array)
+print("ozk thetas =", theta_array)
 
 
-print(youbot.get_end_effector_coors(theta_array))
+print("coor test ozk by pzk =", youbot.get_end_effector_coors(theta_array))
 
 youbot.view_model.plot(theta_array, block=True)
 plt.show()
-# h = youbot_dh.view_model.fkine([theta_1, theta_2, theta_3, theta_4, theta_5])
-# youbot_dh.view_model.plot([theta_1, theta_2, theta_3, theta_4, theta_5], block=True)
-#plt.show()
-
