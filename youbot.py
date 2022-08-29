@@ -4,7 +4,6 @@ import roboticstoolbox as rtb
 
 np.set_printoptions(precision=4, suppress=True)
 
-
 class Youbot :
     #length of the YOUBOT's links 
     links_length = [0.033, 0.147, 0.155, 0.135, 0.2175]
@@ -194,33 +193,3 @@ class Youbot :
 
         return theta_array
     ################IKP END##################
-
-# time = np.arange(0, 200, 0.2)
-
-# #YOUBOT angle(rad) function
-# ### time - time in f(t)
-# ### omega - omega in sin(omega * t)
-# ### ampl - Amplitude in A * sin(x)
-# ### joint_num - number of youbot joint
-# def r(time, omega, ampl):
-#     return np.sin(time * omega + np.pi/2) * ampl
-
-youbot = Youbot()
-
-#GOAL coordinates
-x = 0.15
-y = 0.15
-z = 0.4
-coordinates = np.array([x,y,z])
-
-print("coor = " ,coordinates)
-
-theta_array = youbot.inverse_get_theta_array(coordinates, conf_t_1 = 1, conf_t_3 = 1, orientation_angle = -np.pi/4)
-
-print("ozk thetas =", theta_array)
-
-
-print("coor test ozk by pzk =", youbot.get_end_effector_coors(theta_array))
-
-youbot.view_model.plot(theta_array, block=True)
-plt.show()
