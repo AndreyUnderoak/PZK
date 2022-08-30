@@ -5,12 +5,44 @@ import roboticstoolbox as rtb
 np.set_printoptions(precision=4, suppress=True)
 
 class Youbot :
+    #converting from YOUBOT angles(rad) to KINEMATIC model angles(rad)
+    def youbot_to_theta(r_array, angle_diff):
+        r_temp = r_array.copy()
+        for i in range(len(r_temp) - 1):
+            r_temp[i] -= angle_diff[i]
+        return r_temp
+
+    def theta_to_youbot(t_array, angle_diff):
+        t_temp = t_array.copy()
+        for i in range(len(t_temp) - 1):
+            t_temp[i] += angle_diff[i]
+        return t_temp
+    
     #length of the YOUBOT's links 
     links_length = [0.033, 0.147, 0.155, 0.135, 0.2175]
 
     #YOUBOT angles
     youbot_angles = np.radians(np.array([169, 65, -146, 102, 167]))
 
+    class Joint:
+        def __init__(self, min, max):
+            self.min = min
+            self.max = max
+        
+        def in_range(self, youbot_angle):
+            if self.min < youbot_angle and self.max > youbot_angle :
+                return True
+            else :
+                return False
+            
+    joints = np.array([
+        Joint(np.radians(-169), np.radians(169)),
+        Joint(np.radians(-65 ), np.radians(90 )),
+        Joint(np.radians(-151), np.radians(146)),
+        Joint(np.radians(-102), np.radians(102)),
+        Joint(np.radians(-167), np.radians(167))
+    ])
+    
     class Link:
         def __init__(self, flip, offset, d, a, alpha):
             self.flip = flip
@@ -18,15 +50,7 @@ class Youbot :
             self.d      = d
             self.a      = a
             self.alpha  = alpha
-    
-    # links = np.array([
-    #     Link(offset = 0,        d = -links_length[1],  a = links_length[0], alpha = np.pi/2),
-    #     Link(offset = -np.pi/2, d = 0,                 a = links_length[2], alpha = -np.pi),
-    #     Link(offset = 0,        d = 0,                 a = links_length[3], alpha = np.pi),
-    #     Link(offset = -np.pi/2, d = 0,                 a = 0,               alpha = np.pi/2),
-    #     Link(offset = 0,        d = -links_length[4],  a = 0,               alpha = 0)
-    # ])
-
+            
     links = np.array([
         Link(flip = True,  offset = 0,        d = links_length[1],   a = links_length[0], alpha = -np.pi/2),
         Link(flip = False, offset = -np.pi/2, d = 0,                 a = links_length[2], alpha = -np.pi),
@@ -45,19 +69,6 @@ class Youbot :
         
         self.view_model = rtb.DHRobot(temp.tolist(), name="YOUBOT")
         #self.view_model.plot(self.view_model.q, block=True)
-    
-    #converting from YOUBOT angles(rad) to KINEMATIC model angles(rad)
-    def youbot_to_theta(r_array, angle_diff):
-        r_temp = r_array.copy()
-        for i in range(len(r_temp) - 1):
-            r_temp[i] -= angle_diff[i]
-        return r_temp
-
-    def theta_to_youbot(t_array, angle_diff):
-        t_temp = t_array.copy()
-        for i in range(len(t_temp) - 1):
-            t_temp[i] += angle_diff[i]
-        return t_temp
 
     ################FKP START################
     def a_matrix(self, theta_array, link_num):
@@ -152,7 +163,6 @@ class Youbot :
         return np.dot(m1,m2)
 
     def inverse_position(self, coordinates, theta_array, conf_t_1, conf_t_3):
-
         theta_array = np.append(theta_array, np.array
                 ([
                     self.t_2(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3),
@@ -188,8 +198,11 @@ class Youbot :
         print("p = ", p)
 
         theta_array = self.inverse_position(p, theta_array, conf_t_1, conf_t_3)
-        
         theta_array = self.inverse_orientation(theta_array, r05)
-
+        
+        for i in range(len(theta_array)):
+            if not self.joints[i].in_range(theta_array[i]) :
+                raise Exception("OUT OF JOINT RANGE")
+        
         return theta_array
     ################IKP END##################
