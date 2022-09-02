@@ -116,7 +116,12 @@ class Youbot :
         p_square = (xp - l[0])**2 + (z-l[1])**2
         
         cosT_3  = - (l[2]**2 + l[3]**2 - p_square) / (2 * l[2] * l[3])
+        cosT_3 = np.round(cosT_3, 3)
+        print("t_1 = ", t_1_temp)
 
+        print("xp = ", xp)
+        print("p_s = ", p_square)
+        print("cos = ", cosT_3)
         for i in np.c_[cosT_3]:
             if np.abs(i) > 1 :
                 raise Exception("OUT OF LINKS RANGE")
@@ -141,12 +146,12 @@ class Youbot :
 
         return np.arctan2(xp - l[0], z - l[1]) - beta
     
-    def orientation(self, orientation_angle, theta_1, conf_t_1):
+    def orientation(self, orientation_angle, theta_1, theta_5, conf_t_1):
         th1 = -theta_1
         if conf_t_1 == 2:
             th1 += np.pi
 
-        m1 = np.zeros([3,3]); m2 = m1.copy()
+        m1 = np.zeros([3,3]); m2 = m1.copy(); m3 = m1.copy()
 
         m1[1][1] = np.cos(th1) 
         m1[0][0] = np.cos(th1)
@@ -154,13 +159,22 @@ class Youbot :
         m1[1][0] = np.sin(th1)
         m1[2][2] = 1
 
-        m2[2][2] = np.cos(orientation_angle - np.pi/2)
-        m2[0][0] = np.cos(orientation_angle - np.pi/2)
-        m2[0][2] = np.sin(orientation_angle - np.pi/2)
-        m2[2][0] = - np.sin(orientation_angle - np.pi/2)
+        m2[2][2] = np.cos(orientation_angle - np.pi)
+        m2[0][0] = np.cos(orientation_angle - np.pi)
+        m2[0][2] = np.sin(orientation_angle - np.pi)
+        m2[2][0] = - np.sin(orientation_angle - np.pi)
         m2[1][1] = 1
         
-        return np.dot(m1,m2)
+        m3[1][1] = np.cos(theta_5) 
+        m3[0][0] = np.cos(theta_5)
+        m3[0][1] = - np.sin(theta_5)
+        m3[1][0] = np.sin(theta_5)
+        m3[2][2] = 1
+        
+        m1 = np.dot(m1,m2)
+        m1 = np.dot(m1,m3)
+        
+        return m1
 
     def inverse_position(self, coordinates, theta_array, conf_t_1, conf_t_3):
         theta_array = np.append(theta_array, np.array
@@ -183,15 +197,17 @@ class Youbot :
 
         return theta_array
 
-    def inverse_get_theta_array(self, coordinates, conf_t_1, conf_t_3, orientation_angle = 0):
+    def inverse_get_theta_array(self, coordinates, conf_t_1, conf_t_3, orientation_angle = 0, ee_angle = 0):
 
         theta_array = np.array([- self.t_1(coordinates[0], coordinates[1], conf_t_1)])
 
         print("th1 = ", theta_array[0])
 
-        r05 = self.orientation(orientation_angle, theta_array[0], conf_t_1)
+        r05 = self.orientation(orientation_angle, theta_array[0], ee_angle, conf_t_1)
 
-        print(r05)
+        print("r05 = ", r05)
+        
+        print("rfr  = ", np.dot(r05, np.array([0, 0, -self.links_length[4]])))
         #shift to p coordinates
         p = coordinates - np.dot(r05, np.array([0, 0, -self.links_length[4]]))
 
