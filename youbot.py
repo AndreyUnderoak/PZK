@@ -116,17 +116,22 @@ class Youbot :
         p_square = (xp - l[0])**2 + (z-l[1])**2
         
         cosT_3  = - (l[2]**2 + l[3]**2 - p_square) / (2 * l[2] * l[3])
-        #cosT_3 = np.round(cosT_3, 3)
-        print("t_1 = ", t_1_temp)
 
-        print("xp = ", xp)
-        print("p_s = ", p_square)
-        print("cos = ", cosT_3)
-        for i in np.c_[cosT_3]:
-            if np.abs(i) > 1.0001 :
+        # IF NOT AN ARRAY
+        if(type(cosT_3) == np.float64):
+            if np.abs(cosT_3) > 1.0001 :
                 raise Exception("OUT OF LINKS RANGE")
-            if np.abs(i) > 1 :
-                i = np.round(i, 3)
+            if np.abs(cosT_3) > 1 :
+                cosT_3 = np.round(cosT_3, 3)
+        
+        # IF ARRAY
+        else:
+            for i in range(len(cosT_3)):
+                if np.abs(cosT_3[i]) > 1.0001 :
+                    raise Exception("OUT OF LINKS RANGE")
+                if np.abs(cosT_3[i]) > 1 :
+                    cosT_3[i] = np.round(cosT_3[i], 3)
+                    
         if conf_t_1 == 1:
             if conf_t_3 == 1 :
                 return np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
@@ -167,6 +172,9 @@ class Youbot :
         m2[2][0] = - np.sin(orientation_angle - np.pi)
         m2[1][1] = 1
         
+        if conf_t_1 == 2:
+            theta_5-=np.pi
+            
         m3[1][1] = np.cos(theta_5) 
         m3[0][0] = np.cos(theta_5)
         m3[0][1] = - np.sin(theta_5)
@@ -203,24 +211,18 @@ class Youbot :
 
         theta_array = np.array([- self.t_1(coordinates[0], coordinates[1], conf_t_1)])
 
-        print("th1 = ", theta_array[0])
-
         r05 = self.orientation(orientation_angle, theta_array[0], ee_angle, conf_t_1)
 
-        print("r05 = ", r05)
-        
-        print("rfr  = ", np.dot(r05, np.array([0, 0, -self.links_length[4]])))
         #shift to p coordinates
         p = coordinates - np.dot(r05, np.array([0, 0, -self.links_length[4]]))
 
-        print("p = ", p)
 
         theta_array = self.inverse_position(p, theta_array, conf_t_1, conf_t_3)
         theta_array = self.inverse_orientation(theta_array, r05)
         
         for i in range(len(theta_array)):
             if not self.joints[i].in_range(theta_array[i]) :
-                raise Exception("OUT OF JOINT RANGE")
+                raise Exception('OUT OF JOINT RANGE theta_array =',theta_array)
         
         return theta_array
     ################IKP END##################
