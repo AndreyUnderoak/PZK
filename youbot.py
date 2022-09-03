@@ -53,9 +53,9 @@ class Youbot :
             
     links = np.array([
         Link(flip = True,  offset = 0,        d = links_length[1],   a = links_length[0], alpha = -np.pi/2),
-        Link(flip = False, offset = -np.pi/2, d = 0,                 a = links_length[2], alpha = -np.pi),
-        Link(flip = False, offset = 0,        d = 0,                 a = links_length[3], alpha = np.pi),
-        Link(flip = False, offset = -np.pi/2, d = 0,                 a = 0,               alpha = np.pi/2),
+        Link(flip = False, offset = -np.pi/2, d = 0,                 a = links_length[2], alpha = 0),
+        Link(flip = False, offset = 0,        d = 0,                 a = links_length[3], alpha = 0),
+        Link(flip = False, offset = np.pi/2, d = 0,                 a = 0,               alpha = -np.pi/2),
         Link(flip = False, offset = 0,        d = -links_length[4],  a = 0,               alpha = 0)
     ])
 
@@ -116,15 +116,17 @@ class Youbot :
         p_square = (xp - l[0])**2 + (z-l[1])**2
         
         cosT_3  = - (l[2]**2 + l[3]**2 - p_square) / (2 * l[2] * l[3])
-        cosT_3 = np.round(cosT_3, 3)
+        #cosT_3 = np.round(cosT_3, 3)
         print("t_1 = ", t_1_temp)
 
         print("xp = ", xp)
         print("p_s = ", p_square)
         print("cos = ", cosT_3)
         for i in np.c_[cosT_3]:
-            if np.abs(i) > 1 :
+            if np.abs(i) > 1.0001 :
                 raise Exception("OUT OF LINKS RANGE")
+            if np.abs(i) > 1 :
+                i = np.round(i, 3)
         if conf_t_1 == 1:
             if conf_t_3 == 1 :
                 return np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
@@ -180,7 +182,7 @@ class Youbot :
         theta_array = np.append(theta_array, np.array
                 ([
                     self.t_2(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3),
-                    - self.t_3(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3)
+                    self.t_3(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3)
                 ]))
         return theta_array
 

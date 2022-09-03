@@ -22,7 +22,7 @@ try:
     # print("coor test ozk by pzk =", youbot.get_end_effector_coors(theta_array))
     
     
-    theta_array = np.array([0,np.pi/8,-np.pi/8, np.pi/4, 0])
+    theta_array = np.array([0,np.pi/8,np.pi/8, np.pi/4, 0])
     
     
     youbot.view_model.plot(theta_array, block=True)
