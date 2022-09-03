@@ -109,8 +109,9 @@ class Youbot :
             return np.arctan2(y,x) - np.pi 
     
     #OZK for T3
-    def t_3(self, x, y, z, l, conf_t_1, conf_t_3):
-        t_1_temp = self.t_1(x, y, conf_t_1)
+    def t_3(self, x, y, z, l, theta_1, conf_t_1, conf_t_3):
+        t_1_temp = - theta_1
+        print("3 = ", t_1_temp)
         xp = x * np.cos(t_1_temp) + y * np.sin(t_1_temp)
 
         p_square = (xp - l[0])**2 + (z-l[1])**2
@@ -120,7 +121,7 @@ class Youbot :
         # IF NOT AN ARRAY
         if(type(cosT_3) == np.float64):
             if np.abs(cosT_3) > 1.0001 :
-                raise Exception("OUT OF LINKS RANGE")
+                raise Exception("OUT OF LINKS RANGE cos = ", cosT_3, " theta_1 = ", t_1_temp)
             if np.abs(cosT_3) > 1 :
                 cosT_3 = np.round(cosT_3, 3)
         
@@ -128,7 +129,7 @@ class Youbot :
         else:
             for i in range(len(cosT_3)):
                 if np.abs(cosT_3[i]) > 1.0001 :
-                    raise Exception("OUT OF LINKS RANGE")
+                    raise Exception("OUT OF LINKS RANGE cos = ", cosT_3, " theta_1 = ", t_1_temp)
                 if np.abs(cosT_3[i]) > 1 :
                     cosT_3[i] = np.round(cosT_3[i], 3)
                     
@@ -144,11 +145,12 @@ class Youbot :
                 return - np.arctan2(np.sqrt(1 - cosT_3**2), cosT_3)
 
     #OZK for T2
-    def t_2(self, x, y, z, l, conf_t_1, conf_t_3):
-        t_1_temp = self.t_1(x, y, conf_t_1)
+    def t_2(self, x, y, z, l, theta_1, conf_t_1, conf_t_3):
+        t_1_temp = - theta_1
+        print("2 = ", t_1_temp)
         xp = x * np.cos(t_1_temp) + y * np.sin(t_1_temp)
 
-        t_3_temp = self.t_3(x, y, z, l, conf_t_1, conf_t_3)
+        t_3_temp = self.t_3(x, y, z, l, theta_1, conf_t_1, conf_t_3)
         beta = np.arctan2(l[3]*np.sin(t_3_temp), l[2]+l[3]*np.cos(t_3_temp))
 
         return np.arctan2(xp - l[0], z - l[1]) - beta
@@ -189,8 +191,8 @@ class Youbot :
     def inverse_position(self, coordinates, theta_array, conf_t_1, conf_t_3):
         theta_array = np.append(theta_array, np.array
                 ([
-                    self.t_2(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3),
-                    self.t_3(coordinates[0], coordinates[1], coordinates[2], self.links_length, conf_t_1, conf_t_3)
+                    self.t_2(coordinates[0], coordinates[1], coordinates[2], self.links_length, theta_array[0], conf_t_1, conf_t_3),
+                    self.t_3(coordinates[0], coordinates[1], coordinates[2], self.links_length, theta_array[0], conf_t_1, conf_t_3)
                 ]))
         return theta_array
 
@@ -210,12 +212,13 @@ class Youbot :
     def inverse_get_theta_array(self, coordinates, conf_t_1, conf_t_3, orientation_angle = 0, ee_angle = 0):
 
         theta_array = np.array([- self.t_1(coordinates[0], coordinates[1], conf_t_1)])
-
+        print("1 = ", theta_array)
         r05 = self.orientation(orientation_angle, theta_array[0], ee_angle, conf_t_1)
 
         #shift to p coordinates
         p = coordinates - np.dot(r05, np.array([0, 0, -self.links_length[4]]))
 
+        print("p = ", p)
 
         theta_array = self.inverse_position(p, theta_array, conf_t_1, conf_t_3)
         theta_array = self.inverse_orientation(theta_array, r05)

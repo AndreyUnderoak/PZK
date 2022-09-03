@@ -20,12 +20,13 @@ theta_for_test = np.array([
         [0,        0,       np.pi/2,  0,       0],
         [0,        0,       np.pi/4,  np.pi/4, 0],
         [0,        0,       0,        0,       0],
-        [np.pi/3,        0,       0,       -np.pi/4, 0],
+        [-np.pi/2,        0,       0,       -np.pi/4, 0],
         [-np.pi/2, 0,       0,        0,       0],
         [-np.pi/2, 0,       np.pi/4,  np.pi/4, 0],
         [-np.pi/2, 0,       np.pi/2,  0,       0],
         [-np.pi/2, np.pi/3, np.pi/4,  np.pi/4, 0],
-        [-np.pi/2, np.pi/3, np.pi/4,  np.pi/2, 0]
+        [-np.pi/2, np.pi/3, np.pi/4,  np.pi/2, 0],
+        [-np.pi/2, -np.pi/6, np.pi/4,  np.pi/4, 0],
     ])
 
 i = 5
