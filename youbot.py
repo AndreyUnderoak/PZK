@@ -106,7 +106,12 @@ class Youbot :
         if conf_t_1 == 1 :
             return np.arctan2(y,x)
         if conf_t_1 == 2 :
-            return np.arctan2(y,x) - np.pi 
+            theta_1 = np.arctan2(y,x)
+            if theta_1 < 0:
+                return theta_1 + np.pi
+            else:
+                return theta_1 - np.pi
+             
     
     #OZK for T3
     def t_3(self, x, y, z, l, theta_1, conf_t_1, conf_t_3):
