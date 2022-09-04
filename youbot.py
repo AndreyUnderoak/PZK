@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import roboticstoolbox as rtb
 
@@ -116,7 +115,6 @@ class Youbot :
     #OZK for T3
     def t_3(self, x, y, z, l, theta_1, conf_t_1, conf_t_3):
         t_1_temp = - theta_1
-        print("3 = ", t_1_temp)
         xp = x * np.cos(t_1_temp) + y * np.sin(t_1_temp)
 
         p_square = (xp - l[0])**2 + (z-l[1])**2
@@ -152,7 +150,6 @@ class Youbot :
     #OZK for T2
     def t_2(self, x, y, z, l, theta_1, conf_t_1, conf_t_3):
         t_1_temp = - theta_1
-        print("2 = ", t_1_temp)
         xp = x * np.cos(t_1_temp) + y * np.sin(t_1_temp)
 
         t_3_temp = self.t_3(x, y, z, l, theta_1, conf_t_1, conf_t_3)
@@ -217,13 +214,10 @@ class Youbot :
     def inverse_get_theta_array(self, coordinates, conf_t_1, conf_t_3, orientation_angle = 0, ee_angle = 0):
 
         theta_array = np.array([- self.t_1(coordinates[0], coordinates[1], conf_t_1)])
-        print("1 = ", theta_array)
         r05 = self.orientation(orientation_angle, theta_array[0], ee_angle, conf_t_1)
 
         #shift to p coordinates
         p = coordinates - np.dot(r05, np.array([0, 0, -self.links_length[4]]))
-
-        print("p = ", p)
 
         theta_array = self.inverse_position(p, theta_array, conf_t_1, conf_t_3)
         theta_array = self.inverse_orientation(theta_array, r05)
